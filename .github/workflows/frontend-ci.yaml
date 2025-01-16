@@ -5,7 +5,7 @@ on:
       - master
     paths:
       - starter/frontend/**
-  workflow_dispatch: null
+  workflow_dispatch:
   
 jobs:
   lint:
@@ -13,9 +13,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+      - name: List files and directories
+        run: ls -R
       - uses: ./.github/workflows/npm-setup.yaml
         with:
           working-directory: starter/frontend
       - name: Run lint
-        working-directory: starter/frontend
-        run: npm run lint
+        run: npm --prefix starter/frontend run lint
