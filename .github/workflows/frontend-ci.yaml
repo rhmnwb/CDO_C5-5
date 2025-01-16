@@ -37,3 +37,11 @@ jobs:
           ${{ runner.os }}-build-${{ env.cache-name }}-
           ${{ runner.os }}-build-
           ${{ runner.os }}-
+          
+    - if: ${{ steps.cache-npm.outputs.cache-hit != 'true' }}
+      name: List the state of node modules
+      continue-on-error: true
+      run: npm --prefix starter/frontend list
+    
+    - name: Install dependencies
+      run: npm --prefix starter/frontend install          
