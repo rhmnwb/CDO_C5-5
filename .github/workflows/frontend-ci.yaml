@@ -14,9 +14,8 @@ on:
   workflow_dispatch:    
 
 jobs:
-  build:
+  setup:
     runs-on: ubuntu-latest
-
     steps:
     - name: Check out repository
       uses: actions/checkout@v3
@@ -25,6 +24,9 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: 18
-
-    - name: Print a message
-      run: echo "Hello, world!"
+        
+    # clear cache  
+    - run: cd frontend && npm cache clean --force
+    # install dependencies
+    - run: cd frontend && npm ci
+    
