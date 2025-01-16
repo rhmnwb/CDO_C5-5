@@ -1,10 +1,14 @@
 name: ci-frontend-workflow
 
 on:
-  # Is triggered on pull_requests events against the main branch
+  # 1. Is triggered on pull_requests events against the main branch
   pull_request:
     branches:
       - master
+    # a. Only when code in the frontend application changes  
+    paths:
+      - 'starter/frontend/**'  
+
 
   # 2. Can be run on-demand (i.e. manually without needing to push code)
   workflow_dispatch:    
