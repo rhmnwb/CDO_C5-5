@@ -1,9 +1,13 @@
 name: ci-frontend-workflow
 
 on:
-  push:
+  # Is triggered on pull_requests events against the main branch
+  pull_request:
     branches:
       - master
+
+  # 2. Can be run on-demand (i.e. manually without needing to push code)
+  workflow_dispatch:    
 
 jobs:
   build:
