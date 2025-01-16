@@ -4,7 +4,7 @@ on:
   # Is triggered on pull_requests events against the main branch
   pull_request:
     branches:
-      - main
+      - master
 
   # 2. Can be run on-demand (i.e. manually without needing to push code)
   workflow_dispatch:    
