@@ -1,10 +1,16 @@
-name: ci-frontend-workflow
+name: "Use Composite Action"
 on:
   push:
     branches:
-      - master
+      - main
+
 jobs:
-  lint:
+  example-job:
     runs-on: ubuntu-latest
     steps:
-      - uses: ./.github/workflows/test.yaml
+      - name: Use Composite Action
+        uses: ./.github/workflows/test.yaml
+        with:
+          example-input: "World"
+      - name: Display Output
+        run: echo "Output was: ${{ env.example-output }}"
