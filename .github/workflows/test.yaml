@@ -1,11 +1,18 @@
-name: npm-setup
+name: "Example Composite Action"
+description: "A basic example of a composite action"
+inputs:
+  example-input:
+    description: "An example input"
+    required: true
+outputs:
+  example-output:
+    description: "An example output"
+runs:
+  using: "composite"
+  steps:
+    - name: Run a script
+      run: echo "Hello, ${{ inputs.example-input }}!" > output.txt
 
-on:
-  workflow_call:
-
-jobs:
-  setup:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Hello World
-      run: echo "Hello World!"
+    - name: Set output
+      id: set-output
+      run: echo "example-output=$(cat output.txt)" >> $GITHUB_ENV
