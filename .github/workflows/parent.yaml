@@ -13,4 +13,4 @@ jobs:
         with:
           example-input: "World"
       - name: Display Output
-        run: echo "Output was: ${{ env.example-output }}"
+        run: echo "Output was"
