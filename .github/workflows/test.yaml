@@ -1,0 +1,11 @@
+name: npm-setup
+
+on:
+  workflow_call:
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Hello World
+      run: echo "Hello World!"
