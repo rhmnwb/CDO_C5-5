@@ -69,6 +69,7 @@ jobs:
           ${{ runner.os }}-
         
     - name: Install dependencies
-      run: npm --prefix ${{ inputs.working-directory }} install    
-
-    - run: npm --prefix ${{ inputs.working-directory }} run lint . 
+      run: npm --prefix $APP_DIR install 
+      
+    - name: Run lint
+      run: npm --prefix $APP_DIR run lint . 
