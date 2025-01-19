@@ -72,4 +72,35 @@ jobs:
       run: npm --prefix ${{ env.APP_DIR }} install
       
     - name: Run lint
-      run: npm --prefix $APP_DIR run lint . 
+      run: npm --prefix $APP_DIR run lint .
+
+  test:
+    needs: [ setup ]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    
+    - name: Use Node.js 18
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+
+    - name: Cache node modules
+      id: cache-npm
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-node-modules
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('${{ env.APP_DIR }}/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
+
+    - name: Install dependencies
+      run: npm --prefix ${{ env.APP_DIR }} install
+      
+    - name: Run lint
+      run: npm --prefix $APP_DIR run test .       
