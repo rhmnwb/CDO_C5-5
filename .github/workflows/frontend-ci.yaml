@@ -8,7 +8,8 @@ on:
   workflow_dispatch:
 
 env:
-  APP_DIR: starter/frontend  
+  APP_DIR: starter/frontend
+  NODE_VERSION: "16.x"
   
 jobs:
   setup:
@@ -17,10 +18,10 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
     
-    - name: Use Node.js 18
+    - name: Use Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: 18
+        node-version: $NODE_VERSION
 
     - name: Cache node modules
       id: cache-npm
@@ -50,10 +51,10 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
     
-    - name: Use Node.js 18
+    - name: Use Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: 18
+        node-version: $NODE_VERSION
 
     - name: Cache node modules
       id: cache-npm
@@ -81,10 +82,10 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
     
-    - name: Use Node.js 18
+    - name: Use Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: 18
+        node-version: $NODE_VERSION
 
     - name: Cache node modules
       id: cache-npm
