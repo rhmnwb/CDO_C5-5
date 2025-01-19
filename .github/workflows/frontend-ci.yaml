@@ -6,19 +6,69 @@ on:
     paths:
       - starter/frontend/**
   workflow_dispatch:
+
+env:
+  APP_DIR: starter/frontend  
   
 jobs:
-  lint:
+  setup:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: List files and directories
-        run: ls -R
-      - uses: ./.github/workflows/npm-setup.yaml
-        with:
-          working-directory: starter/frontend
-      - name: Run lint
-        run: npm --prefix starter/frontend run lint
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    
+    - name: Use Node.js 18
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+
+    - name: Cache node modules
+      id: cache-npm
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-node-modules
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles($APP_DIR + '/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
+
+    - if: '${{ steps.cache-npm.outputs.cache-hit != ''true'' }}'
+      name: List the state of node modules
+      continue-on-error: true
+      run: npm --prefix $APP_DIR list
+        
+    - name: Install dependencies
+      run: npm --prefix $APP_DIR install
+      
+  lint:
+    needs: [ setup ]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    
+    - name: Use Node.js 18
+      uses: actions/setup-node@v3
+      with:
+        node-version: 18
+
+    - name: Cache node modules
+      id: cache-npm
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-node-modules
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles($APP_DIR + '/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
+        
+    - name: Install dependencies
+      run: npm --prefix ${{ inputs.working-directory }} install    
+
+    - run: npm --prefix ${{ inputs.working-directory }} run lint . 
