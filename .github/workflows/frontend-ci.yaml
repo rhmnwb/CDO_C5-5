@@ -29,7 +29,7 @@ jobs:
         cache-name: cache-node-modules
       with:
         path: ~/.npm
-        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles($APP_DIR + '/package-lock.json') }}
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('${{ env.APP_DIR }}/package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-build-${{ env.cache-name }}-
           ${{ runner.os }}-build-
@@ -38,10 +38,10 @@ jobs:
     - if: '${{ steps.cache-npm.outputs.cache-hit != ''true'' }}'
       name: List the state of node modules
       continue-on-error: true
-      run: npm --prefix $APP_DIR list
+      run: npm --prefix ${{ env.APP_DIR }} list
         
     - name: Install dependencies
-      run: npm --prefix $APP_DIR install
+      run: npm --prefix ${{ env.APP_DIR }} install
       
   lint:
     needs: [ setup ]
@@ -62,14 +62,14 @@ jobs:
         cache-name: cache-node-modules
       with:
         path: ~/.npm
-        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles($APP_DIR + '/package-lock.json') }}
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('${{ env.APP_DIR }}/package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-build-${{ env.cache-name }}-
           ${{ runner.os }}-build-
           ${{ runner.os }}-
-        
+
     - name: Install dependencies
-      run: npm --prefix $APP_DIR install 
+      run: npm --prefix ${{ env.APP_DIR }} install
       
     - name: Run lint
       run: npm --prefix $APP_DIR run lint . 
