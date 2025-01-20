@@ -3,13 +3,16 @@ name: ci-frontend-workflow
 on:
   # Manual trigger using the workflow_dispatch event
   workflow_dispatch:
+    inputs:
+      environment:
+        type: environment
 
   # Automatic trigger on push events to the main branch
   pull_request:
     branches:
       - main
     paths:
-      - 'starter/frontend/**'
+      - 'starter/frontend/**' 
 
 jobs:
   setup:
