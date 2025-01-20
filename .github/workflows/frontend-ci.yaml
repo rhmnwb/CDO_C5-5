@@ -1,35 +1,32 @@
 name: ci-frontend-workflow
 
 on:
-  # Manual trigger
+  # Manual trigger using the workflow_dispatch event
   workflow_dispatch:
     inputs:
       environment:
         type: environment
         
-  # Automatic trigger on PR
+  # Automatic trigger on push events to the main branch
   pull_request:
     branches:
       - main
     paths:
-      - 'starter/frontend/**'
+      - 'starter/frontend/**'     
 
 jobs:
   setup:
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment || 'udacity' }}
+    environment: ${{ inputs.environment }}
     steps:
-    # Checkout repository
     - name: Checkout repository
       uses: actions/checkout@v3
-      
-    # Setup Node
+    
     - name: Use Node.js
       uses: actions/setup-node@v3
       with:
         node-version: ${{ vars.NODE_VERSION }}
-      
-    # Load NPM cache
+
     - name: Cache node modules
       id: cache-npm
       uses: actions/cache@v3
@@ -43,32 +40,27 @@ jobs:
           ${{ runner.os }}-build-
           ${{ runner.os }}-
 
-    # Print missing dependencies
     - if: '${{ steps.cache-npm.outputs.cache-hit != ''true'' }}'
       name: List the state of node modules
       continue-on-error: true
       run: npm --prefix ${{ vars.APP_DIR }} list
-
-    # Install dependencies
+        
     - name: Install dependencies
       run: npm --prefix ${{ vars.APP_DIR }} install
       
   lint:
     needs: [ setup ]
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment || 'udacity' }}
+    environment: ${{ inputs.environment }}
     steps:
-    # Checkout repository
     - name: Checkout repository
       uses: actions/checkout@v3
-      
-    # Setup Node
+    
     - name: Use Node.js
       uses: actions/setup-node@v3
       with:
         node-version: ${{ vars.NODE_VERSION }}
-      
-    # Load NPM cache
+
     - name: Cache node modules
       id: cache-npm
       uses: actions/cache@v3
@@ -82,26 +74,25 @@ jobs:
           ${{ runner.os }}-build-
           ${{ runner.os }}-
 
-    # Run lint
+    - name: Install dependencies
+      run: npm --prefix ${{ vars.APP_DIR }} install
+      
     - name: Run lint
       run: npm --prefix ${{ vars.APP_DIR }} run lint .
 
   test:
     needs: [ setup ]
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment || 'udacity' }}
+    environment: ${{ inputs.environment }}
     steps:
-    # Checkout repository
     - name: Checkout repository
       uses: actions/checkout@v3
-      
-    # Setup Node
+    
     - name: Use Node.js
       uses: actions/setup-node@v3
       with:
         node-version: ${{ vars.NODE_VERSION }}
-      
-    # Load NPM cache
+
     - name: Cache node modules
       id: cache-npm
       uses: actions/cache@v3
@@ -115,26 +106,25 @@ jobs:
           ${{ runner.os }}-build-
           ${{ runner.os }}-
 
-    # Run tests
+    - name: Install dependencies
+      run: npm --prefix ${{ vars.APP_DIR }} install
+      
     - name: Run lint
       run: npm --prefix ${{ vars.APP_DIR }} run test
 
   build:
     needs: [ lint, test ]
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment || 'udacity' }}
+    environment: ${{ inputs.environment }}
     steps:
-    # Checkout repository
     - name: Checkout repository
       uses: actions/checkout@v3
-      
-    # Setup Node
+    
     - name: Use Node.js
       uses: actions/setup-node@v3
       with:
         node-version: ${{ vars.NODE_VERSION }}
-      
-    # Load NPM cache
+
     - name: Cache node modules
       id: cache-npm
       uses: actions/cache@v3
@@ -148,6 +138,10 @@ jobs:
           ${{ runner.os }}-build-
           ${{ runner.os }}-
 
+    - name: Install dependencies
+      run: npm --prefix ${{ vars.APP_DIR }} install
+
     - name: Build Application
       run: |
         cd ${{ vars.APP_DIR }} && docker build --build-arg REACT_APP_MOVIE_API_URL=${{ vars.REACT_APP_MOVIE_API_URL }} .
+        
