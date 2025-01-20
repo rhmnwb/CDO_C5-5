@@ -17,10 +17,13 @@ on:
 jobs:
   setup:
     runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.environment }}
+    environment: ${{ inputs.environment }}
     steps:
-    - run: echo "The environment is ${{ github.event.inputs.environment }}"
-    - run: echo "The APP_DIR is ${{ env.APP_DIR }}"
-    - run: echo "The NODE_VERSION is ${{ env.NODE_VERSION }}"
-    - run: echo "The REACT_APP_MOVIE_API_URL is ${{ env.REACT_APP_MOVIE_API_URL }}"
+      - name: Print the environment
+        run: echo "The environment is ${{ inputs.environment }}"
+      - name: Print environment variables
+        run: |
+          echo "The APP_DIR is $APP_DIR"
+          echo "The NODE_VERSION is $NODE_VERSION"
+          echo "The REACT_APP_MOVIE_API_URL is $REACT_APP_MOVIE_API_URL"
         
