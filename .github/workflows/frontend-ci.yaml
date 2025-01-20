@@ -12,7 +12,6 @@ on:
       - 'starter/frontend/**'
 
 env:
-  APP_DIR: starter/frontend
   REACT_APP_MOVIE_API_URL: ${{ vars.REACT_APP_MOVIE_API_URL }}
 
 jobs:
