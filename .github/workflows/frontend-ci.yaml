@@ -8,12 +8,12 @@ on:
         type: environment
 
 env:
-  ENVIRONMENT: ${{ inputs.environment || 'udacity' }}
+  ENVIRONMENT: udacity
         
 jobs:
   setup:
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment || 'udacity' }}
+    environment: ${{ env.ENVIRONMENT }}
     steps:
       - name: Print the environment
         run: echo "The environment is ${{ env.ENVIRONMENT }}"
