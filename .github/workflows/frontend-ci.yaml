@@ -13,7 +13,7 @@ env:
 jobs:
   setup:
     runs-on: ubuntu-latest
-    environment: udacity
+    environment: ${{ inputs.environment || 'udacity' }}
     steps:
       - name: Print the environment
         run: echo "The environment is ${{ env.ENVIRONMENT }}"
