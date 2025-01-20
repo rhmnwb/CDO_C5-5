@@ -11,9 +11,6 @@ on:
     paths:
       - 'starter/frontend/**'
 
-env:
-  REACT_APP_MOVIE_API_URL: ${{ vars.REACT_APP_MOVIE_API_URL }}
-
 jobs:
   setup:
     runs-on: ubuntu-latest
