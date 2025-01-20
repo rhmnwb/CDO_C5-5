@@ -123,7 +123,7 @@ jobs:
     - name: Build Application
       run: |
         cd ${{ vars.BACKEND_APP_DIR }}
-        docker build --build-arg REACT_APP_MOVIE_API_URL=${{ vars.REACT_APP_MOVIE_API_URL }} -t $BACKEND_CONTAINER_REGISTRY_URL:${{ github.sha }} .
+        docker build -t $BACKEND_CONTAINER_REGISTRY_URL:${{ github.sha }} .
         docker push $BACKEND_CONTAINER_REGISTRY_URL:${{ github.sha }}
   
   deploy:
