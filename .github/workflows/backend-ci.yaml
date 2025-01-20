@@ -42,3 +42,79 @@ jobs:
     - name: Install Dependencies
       if: steps.cache-pipenv.outputs.cache-hit != 'true'
       run: cd ${{ vars.BACKEND_APP_DIR }} && pipenv install --system --deploy --dev
+
+  lint:
+    runs-on: ubuntu-latest
+    needs: [setup]
+    environment: ${{ inputs.environment }}
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    
+    - uses: actions/setup-python@v3
+      with:
+        python-version: "3.10"
+
+    - name: Cache pipenv
+      uses: actions/cache@v4
+      id: cache-pipenv
+      with:
+        path: ~/.local/share/virtualenvs
+        key: ${{ runner.os }}-python-${{ steps.setup-python.outputs.python-version }}-pipenv-${{ hashFiles('${{ vars.BACKEND_APP_DIR }}/Pipfile.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-pipenv
+          
+    - name: Install pipenv
+      if: steps.cache-pipenv.outputs.cache-hit != 'true'
+      run: cd ${{ vars.BACKEND_APP_DIR }} && python -m pip install --upgrade pipenv wheel
+
+    - name: Install Dependencies
+      if: steps.cache-pipenv.outputs.cache-hit != 'true'
+      run: cd ${{ vars.BACKEND_APP_DIR }} && pipenv install --system --deploy --dev
+
+    # Run lint
+    - run: cd ${{ vars.BACKEND_APP_DIR }} && pipenv run lint .
+    
+  test:
+    runs-on: ubuntu-latest
+    needs: [setup]
+    environment: ${{ inputs.environment }}
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    
+    - uses: actions/setup-python@v3
+      with:
+        python-version: "3.10"
+
+    - name: Cache pipenv
+      uses: actions/cache@v4
+      id: cache-pipenv
+      with:
+        path: ~/.local/share/virtualenvs
+        key: ${{ runner.os }}-python-${{ steps.setup-python.outputs.python-version }}-pipenv-${{ hashFiles('${{ vars.BACKEND_APP_DIR }}/Pipfile.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-pipenv
+          
+    - name: Install pipenv
+      if: steps.cache-pipenv.outputs.cache-hit != 'true'
+      run: cd ${{ vars.BACKEND_APP_DIR }} && python -m pip install --upgrade pipenv wheel
+
+    - name: Install Dependencies
+      if: steps.cache-pipenv.outputs.cache-hit != 'true'
+      run: cd ${{ vars.BACKEND_APP_DIR }} && pipenv install --system --deploy --dev    
+    
+    # Run tests
+    - run: cd ${{ vars.BACKEND_APP_DIR }} && pipenv run test
+
+  build:
+    needs: [ lint,test ]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3    
+
+      # Build Backend
+      - name: Build backend app
+        run: cd ${{ vars.BACKEND_APP_DIR }} && docker build .
