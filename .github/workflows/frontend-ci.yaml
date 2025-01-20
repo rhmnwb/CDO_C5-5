@@ -6,16 +6,147 @@ on:
     inputs:
       environment:
         type: environment
+        
+  # Automatic trigger on push events to the main branch
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'starter/frontend/**'     
 
 jobs:
   setup:
     runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
     steps:
-      - name: Print the environment
-        run: echo "The environment is ${{ inputs.environment }}"
-      - name: Print environment variables
-        run: |
-          echo "The APP_DIR is ${{ vars.APP_DIR }}"
-          echo "The NODE_VERSION is ${{ vars.NODE_VERSION }}"
-          echo "The REACT_APP_MOVIE_API_URL is ${{ vars.REACT_APP_MOVIE_API_URL }}"
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ vars.NODE_VERSION }}
+
+    - name: Cache node modules
+      id: cache-npm
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-node-modules
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('${{ vars.APP_DIR }}/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
+
+    - if: '${{ steps.cache-npm.outputs.cache-hit != ''true'' }}'
+      name: List the state of node modules
+      continue-on-error: true
+      run: npm --prefix ${{ vars.APP_DIR }} list
+        
+    - name: Install dependencies
+      run: npm --prefix ${{ vars.APP_DIR }} install
+      
+  lint:
+    needs: [ setup ]
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ vars.NODE_VERSION }}
+
+    - name: Cache node modules
+      id: cache-npm
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-node-modules
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('${{ vars.APP_DIR }}/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
+
+    - name: Install dependencies
+      run: npm --prefix ${{ vars.APP_DIR }} install
+      
+    - name: Run lint
+      run: npm --prefix ${{ vars.APP_DIR }} run lint .
+
+  test:
+    needs: [ setup ]
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ vars.NODE_VERSION }}
+
+    - name: Cache node modules
+      id: cache-npm
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-node-modules
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('${{ vars.APP_DIR }}/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
+
+    - name: Install dependencies
+      run: npm --prefix ${{ vars.APP_DIR }} install
+      
+    - name: Run lint
+      run: npm --prefix ${{ vars.APP_DIR }} run test
+
+  build:
+    needs: [ lint, test ]
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ vars.NODE_VERSION }}
+
+    - name: Cache node modules
+      id: cache-npm
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-node-modules
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('${{ vars.APP_DIR }}/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
+
+    - name: Install dependencies
+      run: npm --prefix ${{ vars.APP_DIR }} install
+
+    - name: Build Application
+      run: |
+        cd ${{ vars.APP_DIR }} && docker build --build-arg REACT_APP_MOVIE_API_URL=${{ vars.REACT_APP_MOVIE_API_URL }} .
+        
+
+
+          
+          
         
