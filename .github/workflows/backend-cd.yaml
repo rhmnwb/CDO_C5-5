@@ -122,7 +122,7 @@ jobs:
         
     - name: Build Application
       run: |
-        cd ${{ vars.FRONTEND_APP_DIR }}
+        cd ${{ vars.BACKEND_APP_DIR }}
         docker build --build-arg REACT_APP_MOVIE_API_URL=${{ vars.REACT_APP_MOVIE_API_URL }} -t $BACKEND_CONTAINER_REGISTRY_URL:${{ github.sha }} .
         docker push $BACKEND_CONTAINER_REGISTRY_URL:${{ github.sha }}
   
@@ -144,8 +144,8 @@ jobs:
       - name: Update kube-config
         run: aws eks update-kubeconfig --name cluster
 
-      - name: Deploy Frontend
+      - name: Deploy Backend
         run: |
-          cd frontend/k8s
+          cd backend/k8s
           kustomize edit set image backend=$BACKEND_CONTAINER_REGISTRY_URL:${{ github.sha }}
           kustomize build | kubectl apply -f -
