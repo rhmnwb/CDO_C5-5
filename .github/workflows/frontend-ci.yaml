@@ -7,13 +7,6 @@ on:
       environment:
         type: environment
 
-  # Automatic trigger on push events to the main branch
-  pull_request:
-    branches:
-      - main
-    paths:
-      - 'starter/frontend/**' 
-
 jobs:
   setup:
     runs-on: ubuntu-latest
