@@ -10,13 +10,12 @@ on:
 jobs:
   setup:
     runs-on: ubuntu-latest
-    environment: udacity
     steps:
       - name: Print the environment
         run: echo "The environment is ${{ inputs.environment }}"
       - name: Print environment variables
         run: |
           echo "The APP_DIR is ${{ vars.APP_DIR }}"
-          echo "The NODE_VERSION is ${{ env.NODE_VERSION }}"
-          echo "The REACT_APP_MOVIE_API_URL is ${{ env.REACT_APP_MOVIE_API_URL }}"
+          echo "The NODE_VERSION is ${{ vars.NODE_VERSION }}"
+          echo "The REACT_APP_MOVIE_API_URL is ${{ vars.REACT_APP_MOVIE_API_URL }}"
         
