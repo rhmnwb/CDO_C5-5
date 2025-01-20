@@ -1,0 +1,164 @@
+name: ci-frontend-workflow
+
+on:
+  # Manual trigger using the workflow_dispatch event
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: environment
+        
+  # Automatic trigger on push events to the main branch
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'starter/frontend/**'     
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ vars.NODE_VERSION }}
+
+    - name: Cache node modules
+      id: cache-npm
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-node-modules
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('${{ vars.FRONTEND_APP_DIR }}/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
+
+    - if: '${{ steps.cache-npm.outputs.cache-hit != ''true'' }}'
+      name: List the state of node modules
+      continue-on-error: true
+      run: npm --prefix ${{ vars.FRONTEND_APP_DIR }} list
+        
+    - name: Install dependencies
+      run: npm --prefix ${{ vars.FRONTEND_APP_DIR }} install
+      
+  lint:
+    needs: [ setup ]
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ vars.NODE_VERSION }}
+
+    - name: Cache node modules
+      id: cache-npm
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-node-modules
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('${{ vars.FRONTEND_APP_DIR }}/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
+
+    - name: Install dependencies
+      run: npm --prefix ${{ vars.FRONTEND_APP_DIR }} install
+      
+    - name: Run lint
+      run: npm --prefix ${{ vars.FRONTEND_APP_DIR }} run lint .
+
+  test:
+    needs: [ setup ]
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ vars.NODE_VERSION }}
+
+    - name: Cache node modules
+      id: cache-npm
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-node-modules
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('${{ vars.FRONTEND_APP_DIR }}/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
+
+    - name: Install dependencies
+      run: npm --prefix ${{ vars.FRONTEND_APP_DIR }} install
+      
+    - name: Run lint
+      run: npm --prefix ${{ vars.FRONTEND_APP_DIR }} run test
+
+  build:
+    needs: [ lint, test ]
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      
+    - name: AWS Configure
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ vars.AWS_REGION }}
+
+    - name: Amazon ECR Login
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+        
+    - name: Build Application
+      run: |
+        cd ${{ vars.FRONTEND_APP_DIR }}
+        docker build --build-arg REACT_APP_MOVIE_API_URL=${{ vars.REACT_APP_MOVIE_API_URL }} -t $FRONTEND_CONTAINER_REGISTRY_URL:${{ github.sha }} .
+        docker push $FRONTEND_CONTAINER_REGISTRY_URL:${{ github.sha }}
+  
+  deploy:
+    needs: [ lint, test, build ]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: AWS Configure
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Update kube-config
+        run: aws eks update-kubeconfig --name cluster
+
+      - name: Deploy Frontend
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          cd frontend/k8s
+          kustomize edit set image frontend=$FRONTEND_CONTAINER_REGISTRY_URL:${{ github.sha }}
+          kustomize build | kubectl apply -f -
