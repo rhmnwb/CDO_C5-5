@@ -6,17 +6,14 @@ on:
     inputs:
       environment:
         type: environment
-
-env:
-  ENVIRONMENT: udacity
         
 jobs:
   setup:
     runs-on: ubuntu-latest
-    environment: ${{ env.ENVIRONMENT }}
+    environment: ${{ inputs.environment || 'lalala' }}
     steps:
       - name: Print the environment
-        run: echo "The environment is ${{ env.ENVIRONMENT }}"
+        run: echo "The environment is ${{ inputs.environment || 'lalala' }}
       - name: Print environment variables
         run: |
           echo "The APP_DIR is ${{ vars.APP_DIR }}"
