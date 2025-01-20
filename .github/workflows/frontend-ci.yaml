@@ -34,7 +34,7 @@ jobs:
         cache-name: cache-node-modules
       with:
         path: ~/.npm
-        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('${{ vars.APP_DIR }}/package-lock.json') }}
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('${{ vars.FRONTEND_APP_DIR }}/package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-build-${{ env.cache-name }}-
           ${{ runner.os }}-build-
@@ -43,10 +43,10 @@ jobs:
     - if: '${{ steps.cache-npm.outputs.cache-hit != ''true'' }}'
       name: List the state of node modules
       continue-on-error: true
-      run: npm --prefix ${{ vars.APP_DIR }} list
+      run: npm --prefix ${{ vars.FRONTEND_APP_DIR }} list
         
     - name: Install dependencies
-      run: npm --prefix ${{ vars.APP_DIR }} install
+      run: npm --prefix ${{ vars.FRONTEND_APP_DIR }} install
       
   lint:
     needs: [ setup ]
@@ -68,17 +68,17 @@ jobs:
         cache-name: cache-node-modules
       with:
         path: ~/.npm
-        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('${{ vars.APP_DIR }}/package-lock.json') }}
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('${{ vars.FRONTEND_APP_DIR }}/package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-build-${{ env.cache-name }}-
           ${{ runner.os }}-build-
           ${{ runner.os }}-
 
     - name: Install dependencies
-      run: npm --prefix ${{ vars.APP_DIR }} install
+      run: npm --prefix ${{ vars.FRONTEND_APP_DIR }} install
       
     - name: Run lint
-      run: npm --prefix ${{ vars.APP_DIR }} run lint .
+      run: npm --prefix ${{ vars.FRONTEND_APP_DIR }} run lint .
 
   test:
     needs: [ setup ]
@@ -100,17 +100,17 @@ jobs:
         cache-name: cache-node-modules
       with:
         path: ~/.npm
-        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('${{ vars.APP_DIR }}/package-lock.json') }}
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('${{ vars.FRONTEND_APP_DIR }}/package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-build-${{ env.cache-name }}-
           ${{ runner.os }}-build-
           ${{ runner.os }}-
 
     - name: Install dependencies
-      run: npm --prefix ${{ vars.APP_DIR }} install
+      run: npm --prefix ${{ vars.FRONTEND_APP_DIR }} install
       
     - name: Run lint
-      run: npm --prefix ${{ vars.APP_DIR }} run test
+      run: npm --prefix ${{ vars.FRONTEND_APP_DIR }} run test
 
   build:
     needs: [ lint, test ]
@@ -132,16 +132,16 @@ jobs:
         cache-name: cache-node-modules
       with:
         path: ~/.npm
-        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('${{ vars.APP_DIR }}/package-lock.json') }}
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('${{ vars.FRONTEND_APP_DIR }}/package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-build-${{ env.cache-name }}-
           ${{ runner.os }}-build-
           ${{ runner.os }}-
 
     - name: Install dependencies
-      run: npm --prefix ${{ vars.APP_DIR }} install
+      run: npm --prefix ${{ vars.FRONTEND_APP_DIR }} install
 
     - name: Build Application
       run: |
-        cd ${{ vars.APP_DIR }} && docker build --build-arg REACT_APP_MOVIE_API_URL=${{ vars.REACT_APP_MOVIE_API_URL }} .
+        cd ${{ vars.FRONTEND_APP_DIR }} && docker build --build-arg REACT_APP_MOVIE_API_URL=${{ vars.REACT_APP_MOVIE_API_URL }} .
         
