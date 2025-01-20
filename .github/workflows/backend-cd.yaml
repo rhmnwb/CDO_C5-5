@@ -147,5 +147,5 @@ jobs:
       - name: Deploy Frontend
         run: |
           cd frontend/k8s
-          kustomize edit set image frontend=$BACKEND_CONTAINER_REGISTRY_URL:${{ github.sha }}
+          kustomize edit set image backend=$BACKEND_CONTAINER_REGISTRY_URL:${{ github.sha }}
           kustomize build | kubectl apply -f -
