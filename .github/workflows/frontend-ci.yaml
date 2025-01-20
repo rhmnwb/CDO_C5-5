@@ -11,55 +11,102 @@ on:
     paths:
       - 'starter/frontend/**'
 
+env:
+  APP_DIR: starter/frontend
+  NODE_VERSION: "16.x"      
+
 jobs:
-  lint:
+  setup:
     runs-on: ubuntu-latest
-
     steps:
-      # Check out the code from the repository.
-      - uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ env.NODE_VERSION }}
 
-      # Set up a Node.js environment using the specified node version.
-      - uses: actions/setup-node@v3
-        with:
-          node-version: "16.x"
+    - name: Cache node modules
+      id: cache-npm
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-node-modules
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('${{ env.APP_DIR }}/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
 
-      # clear cache
-      - run: cd starter/frontend && npm cache clean --force
+    - if: '${{ steps.cache-npm.outputs.cache-hit != ''true'' }}'
+      name: List the state of node modules
+      continue-on-error: true
+      run: npm --prefix ${{ env.APP_DIR }} list
+        
+    - name: Install dependencies
+      run: npm --prefix ${{ env.APP_DIR }} install
+      
+  lint:
+    needs: [ setup ]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ env.NODE_VERSION }}
 
-      # Install the dependencies.
-      - run: cd starter/frontend && npm ci
+    - name: Cache node modules
+      id: cache-npm
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-node-modules
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('${{ env.APP_DIR }}/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
 
-      # Run the linter.
-      - run: cd starter/frontend && npm run lint .
-
-      # Send a console message at completion.
-      - run: |
-          echo "List step completed"
+    - name: Install dependencies
+      run: npm --prefix ${{ env.APP_DIR }} install
+      
+    - name: Run lint
+      run: npm --prefix $APP_DIR run lint .
 
   test:
+    needs: [ setup ]
     runs-on: ubuntu-latest
-
     steps:
-      # Check out the code from the repository.
-      - uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ env.NODE_VERSION }}
 
-      # Set up a Node.js environment using the specified node version.
-      - uses: actions/setup-node@v3
-        with:
-          node-version: "16.x"
+    - name: Cache node modules
+      id: cache-npm
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-node-modules
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('${{ env.APP_DIR }}/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
 
-      # clear cache
-      - run: cd starter/frontend && npm cache clean --force
-
-      # Install the dependencies.
-      - run: cd starter/frontend && npm ci
-
-      # Run the tests.
-      - run: cd starter/frontend && npm run test
-
-      # Send a console message at completion.
-      - run: |
-          echo "Test step completed"
-
+    - name: Install dependencies
+      run: npm --prefix ${{ env.APP_DIR }} install
+      
+    - name: Run lint
+      run: npm --prefix $APP_DIR run test
         
