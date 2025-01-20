@@ -23,7 +23,7 @@ jobs:
         run: echo "The environment is ${{ inputs.environment }}"
       - name: Print environment variables
         run: |
-          echo "The APP_DIR is $APP_DIR"
-          echo "The NODE_VERSION is $NODE_VERSION"
-          echo "The REACT_APP_MOVIE_API_URL is $REACT_APP_MOVIE_API_URL"
+          echo "The APP_DIR is ${{ env.APP_DIR }}"
+          echo "The NODE_VERSION is ${{ env.NODE_VERSION }}"
+          echo "The REACT_APP_MOVIE_API_URL is ${{ env.REACT_APP_MOVIE_API_URL }}"
         
