@@ -1,4 +1,4 @@
-name: ci-backend-workflow
+name: backend-ci
 
 on:
   # Manual trigger using the workflow_dispatch event
