@@ -134,7 +134,7 @@ jobs:
       run: |
         cd ${{ vars.FRONTEND_APP_DIR }}
         docker build --build-arg REACT_APP_MOVIE_API_URL=${{ vars.REACT_APP_MOVIE_API_URL }} -t ${{ vars.FRONTEND_CONTAINER_REGISTRY_URL }}:${{ github.sha }} .
-        docker push ${{ FRONTEND_CONTAINER_REGISTRY_URL }}:${{ github.sha }}
+        docker push ${{ vars.FRONTEND_CONTAINER_REGISTRY_URL }}:${{ github.sha }}
   
   deploy:
     needs: [ lint, test, build ]
