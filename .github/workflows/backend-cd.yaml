@@ -123,8 +123,8 @@ jobs:
     - name: Build Application
       run: |
         cd ${{ vars.BACKEND_APP_DIR }}
-        docker build -t $BACKEND_CONTAINER_REGISTRY_URL:${{ github.sha }} .
-        docker push $BACKEND_CONTAINER_REGISTRY_URL:${{ github.sha }}
+        docker build -t ${{ vars.BACKEND_CONTAINER_REGISTRY_URL }}:${{ github.sha }} .
+        docker push ${{ vars.BACKEND_CONTAINER_REGISTRY_URL }}:${{ github.sha }}
   
   deploy:
     needs: [ lint, test, build ]
@@ -142,10 +142,10 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
 
       - name: Update kube-config
-        run: aws eks update-kubeconfig --name cluster
+        run: aws eks update-kubeconfig --name ${{ vars.CLUSTER_NAME }}
 
       - name: Deploy Backend
         run: |
-          cd backend/k8s
-          kustomize edit set image backend=$BACKEND_CONTAINER_REGISTRY_URL:${{ github.sha }}
+          cd starter/backend/k8s
+          kustomize edit set image backend=${{ vars.BACKEND_CONTAINER_REGISTRY_URL }}:${{ github.sha }}
           kustomize build | kubectl apply -f -
