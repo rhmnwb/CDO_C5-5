@@ -133,8 +133,8 @@ jobs:
     - name: Build Application
       run: |
         cd ${{ vars.FRONTEND_APP_DIR }}
-        docker build --build-arg REACT_APP_MOVIE_API_URL=${{ vars.REACT_APP_MOVIE_API_URL }} -t $FRONTEND_CONTAINER_REGISTRY_URL:${{ github.sha }} .
-        docker push $FRONTEND_CONTAINER_REGISTRY_URL:${{ github.sha }}
+        docker build --build-arg REACT_APP_MOVIE_API_URL=${{ vars.REACT_APP_MOVIE_API_URL }} -t ${{ vars.FRONTEND_CONTAINER_REGISTRY_URL }}:${{ github.sha }} .
+        docker push ${{ FRONTEND_CONTAINER_REGISTRY_URL }}:${{ github.sha }}
   
   deploy:
     needs: [ lint, test, build ]
@@ -152,10 +152,10 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
 
       - name: Update kube-config
-        run: aws eks update-kubeconfig --name cluster
+        run: aws eks update-kubeconfig --name ${{ vars.CLUSTER_NAME }}
 
       - name: Deploy Frontend
         run: |
           cd frontend/k8s
-          kustomize edit set image frontend=$FRONTEND_CONTAINER_REGISTRY_URL:${{ github.sha }}
+          kustomize edit set image frontend=${{ vars.FRONTEND_CONTAINER_REGISTRY_URL }}:${{ github.sha }}
           kustomize build | kubectl apply -f -
