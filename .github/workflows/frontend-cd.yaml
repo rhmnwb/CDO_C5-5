@@ -1,5 +1,4 @@
-name: ci-frontend-workflow
-
+name: frontend-cd
 on:
   # Manual trigger using the workflow_dispatch event
   workflow_dispatch:
